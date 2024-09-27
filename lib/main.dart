@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:twinkle/providers/playerProvider.dart';
 import 'package:twinkle/providers/recordProvider.dart';
 import 'package:twinkle/screens/homeScreen.dart';
 
@@ -15,7 +16,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (context)=> RecordProvider())
+          ChangeNotifierProvider(create: (context)=> RecordProvider()),
+          ChangeNotifierProvider(create: (context)=> PlayerProvider())
         ],
       child: MaterialApp(
         theme: ThemeData(

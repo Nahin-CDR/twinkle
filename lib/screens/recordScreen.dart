@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:twinkle/providers/recordProvider.dart';
-
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
+import 'package:twinkle/screens/playerScreen.dart';
 import '../constants/enums.dart';
-import '../widgets/recordButton.dart';
+ // Import the PlayerScreen
 
 class RecordScreen extends StatefulWidget {
   const RecordScreen({super.key});
@@ -27,10 +24,12 @@ class _RecordScreenState extends State<RecordScreen> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Record Screen"),
         backgroundColor: Colors.deepOrange,
+        elevation: 0,
       ),
       body: Container(
         width: double.infinity,
@@ -59,6 +58,7 @@ class _RecordScreenState extends State<RecordScreen> {
                 );
               },
             ),
+
             // Slider to show sound position
             ValueListenableBuilder<Duration>(
               valueListenable: recordProvider.soundPosition,
@@ -75,21 +75,15 @@ class _RecordScreenState extends State<RecordScreen> {
                 );
               },
             ),
+
             // Recording control buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                // Start/Resume Recording Button
-                // recordButton(
-                //   recordProvider,
-                //   screenSize
-                // ),
+                // Record/Pause Recording Button
                 ElevatedButton(
                   onPressed: () {
                     recordProvider.toggleRecordButton();
-                    // recordProvider.voiceRecorderStatus.value == RecorderStatus.recording
-                    //     ? recordProvider.pauseVoiceRecording()
-                    //     : recordProvider.startVoiceRecording();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.deepOrange,
@@ -100,17 +94,18 @@ class _RecordScreenState extends State<RecordScreen> {
                     ),
                   ),
                   child: ValueListenableBuilder<RecorderStatus>(
-                    valueListenable: recordProvider.voiceRecorderStatus,
-                    builder: (BuildContext context, RecorderStatus value, Widget? child) {
-                      return Text(
-                        value == RecorderStatus.recording ? 'Pause' : 'Record',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      );
-                    })
+                      valueListenable: recordProvider.voiceRecorderStatus,
+                      builder: (BuildContext context, RecorderStatus value, Widget? child) {
+                        return Text(
+                          value == RecorderStatus.recording ? 'Pause' : 'Record',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        );
+                      }
+                  ),
                 ),
                 // Stop Recording Button
                 ElevatedButton(
@@ -136,7 +131,8 @@ class _RecordScreenState extends State<RecordScreen> {
                 ),
               ],
             ),
-            // Delete recording button
+
+            // Delete Recording Button
             ElevatedButton.icon(
               onPressed: () {
                 recordProvider.deleteRecordedFile();
@@ -154,9 +150,47 @@ class _RecordScreenState extends State<RecordScreen> {
                 style: TextStyle(color: Colors.white),
               ),
             ),
+
+            // Go to PlayerScreen Button with Animation
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(_createRoute());
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purpleAccent,
+                padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              icon: const Icon(Icons.music_note, color: Colors.white),
+              label: const Text(
+                'Go to Player',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  // Create a page route animation
+  Route _createRoute() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) =>  PlayerScreen(voicePath: recordProvider.recordedAudioPath,),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.ease;
+
+        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
+      },
     );
   }
 }
