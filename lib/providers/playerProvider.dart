@@ -10,7 +10,7 @@ class PlayerProvider with ChangeNotifier{
   String cacheMusic = "";
 
   final Logger _log = Logger('RecordProvider');
-  AudioSource? voiceSound;
+  AudioSource? voiceAudioSource;
   SoundHandle? voiceHandle;
   double echo = 0.0;
   double reverb = 0.0;
@@ -21,6 +21,23 @@ class PlayerProvider with ChangeNotifier{
   late Duration soundLength = Duration.zero;
   StreamSubscription<StreamSoundEvent>? subscription;
 
+  void updateEchoValue(double updatedValue) {
+    if (kDebugMode) {
+      print("Updated ECHO value : $updatedValue");
+    }
+    if(voiceAudioSource != null){
+      final voiceSoundFilter = voiceAudioSource!.filters.echoFilter;
+      voiceSoundFilter.wet(soundHandle: voiceHandle).value = updatedValue;
+      echo = updatedValue;
+    }
+    notifyListeners();
+  }
+  void updateReverbValue(double value){
+    if(reverb != value){
+      reverb = value;
+
+    }
+  }
 
   Future<bool>initRecordedVoiceFile({required String recordedVoicePath})async{
 
@@ -37,26 +54,11 @@ class PlayerProvider with ChangeNotifier{
         },
       );
 
-      //SoLoud.instance.isFilterActive(FilterType.echoFilter);
-      SoLoud.instance.addGlobalFilter(FilterType.echoFilter);
-      SoLoud.instance.addGlobalFilter(FilterType.freeverbFilter);
-      SoLoud.instance.setFilterParameter(FilterType.echoFilter, 0, echo*0.01);
-      SoLoud.instance.setFilterParameter(FilterType.freeverbFilter, 0, echo*0.01);
-
     }
-
     try {
-      voiceSound = await SoLoud.instance.loadFile(recordedVoicePath);
-      //musicSound = await SoLoud.instance.loadFile(cachedMusicFilePath);
-
-
-      // SoLoud.instance.addGlobalFilter(FilterType.echoFilter);
-      // SoLoud.instance.addGlobalFilter(FilterType.freeverbFilter);
-      // SoLoud.instance.setFilterParameter(FilterType.echoFilter, 0, equalizer.echo*0.01);
-      // SoLoud.instance.setFilterParameter(FilterType.freeverbFilter, 0, equalizer.echo*0.01);
-
-      if (voiceSound != null) {
-        soundLength = SoLoud.instance.getLength(voiceSound!);
+      voiceAudioSource = await SoLoud.instance.loadFile(recordedVoicePath);
+      if (voiceAudioSource != null) {
+        soundLength = SoLoud.instance.getLength(voiceAudioSource!);
         prepareAndPlay();
         startTimer();
       }
@@ -65,18 +67,29 @@ class PlayerProvider with ChangeNotifier{
     }
     return false;
   }
-
   Future<void> prepareAndPlay() async {
     try {
-      voiceHandle = await SoLoud.instance.play(voiceSound!,paused: true); // Initially paused
-      // musicHandle = await SoLoud.instance.play(musicSound!, paused: true); // Initially paused
+      voiceHandle = await SoLoud.instance.play(voiceAudioSource!,paused: true); // Initially paused
 
       SoLoud.instance.setVolume(voiceHandle!, 1);
       //  SoLoud.instance.setVolume(musicHandle!, equalizer.musicVolume*0.01);
+      /*
+       => make a filter
+       => activate the filter
+       =>
+       */
 
+      final voiceSoundFilter = voiceAudioSource!.filters.echoFilter;
+      if(!voiceSoundFilter.isActive){
+        voiceSoundFilter.activate();
+      }
+      voiceSoundFilter.wet(soundHandle: voiceHandle).value = echo;
 
-      //startVoiceRecording();
-      subscription = voiceSound!.soundEvents.listen((eventResult) {
+      if (kDebugMode) {
+        print("activated echo filter $echo");
+      }
+
+      subscription = voiceAudioSource!.soundEvents.listen((eventResult) {
         if (eventResult.event == SoundEventType.handleIsNoMoreValid) {
           resetPlayer();
         }
@@ -92,9 +105,7 @@ class PlayerProvider with ChangeNotifier{
       print("=====================  resetPlayer() called ========================\n\n");
     }
 
-    isPlayingKaraoke = false;
 
-    //karaokePlayer.setPlayerMode(PlayerMode.lowLatency);
     SoLoud.instance.stop(voiceHandle!);
     soundPosition.value = Duration.zero;
     isPlaying.value = false;
@@ -144,5 +155,54 @@ class PlayerProvider with ChangeNotifier{
     }
     notifyListeners();
   }
+
+  // just for demo purposes not implemented
+  Future<void> playMultipleSoundsWithEffects() async {
+    //await initialize();
+
+    // Load two different audio files
+    AudioSource sound1 = await SoLoud.instance.loadAsset('assets/audio/sound1.mp3');
+    AudioSource sound2 = await SoLoud.instance.loadAsset('assets/audio/sound2.mp3');
+
+    // Create separate filters for each sound
+    final filter1 = sound1.filters.echoFilter;
+    final filter2 = sound2.filters.freeverbFilter;
+
+    // Activate filters before playing the sounds
+    filter1.activate();
+    filter2.activate();
+
+    // Play the sounds with separate filters applied
+    final h1 = await SoLoud.instance.play(sound1);
+    final h2 = await SoLoud.instance.play(sound2);
+
+    // Set distinct filter values
+    const echoValue = 0.5;
+    const reverbValue = 0.7;
+
+    // Apply echo effect to sound1
+    filter1.wet(soundHandle: h1).value = echoValue;
+    filter1.wet(soundHandle: h1).oscillateFilterParameter(
+      from: 0.1,
+      to: 1.0,
+      time: const Duration(seconds: 3),
+    );
+
+    // Apply reverb effect to sound2
+    filter2.wet(soundHandle: h2).value = reverbValue;
+    filter2.wet(soundHandle: h2).oscillateFilterParameter(
+      from: 0.2,
+      to: 1.5,
+      time: const Duration(seconds: 4),
+    );
+
+    //await delay(6000); // Let both sounds play with their effects
+
+    // Deactivate filters
+    filter1.deactivate();
+    filter2.deactivate();
+
+  }
+
 
 }

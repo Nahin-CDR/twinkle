@@ -93,7 +93,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                   value: playerProvider.echo,
                   onChanged: (value) {
                     setState(() {
-                      playerProvider.echo = value;
+                      playerProvider.updateEchoValue(value);
                     });
                   },
                   min: 0.0,
@@ -112,9 +112,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                 Slider(
                   value: playerProvider.reverb,
                   onChanged: (value) {
-                    setState(() {
-                      playerProvider.reverb = value;
-                    });
+                   playerProvider.updateReverbValue(value);
                   },
                   min: 0.0,
                   max: 1.0,
