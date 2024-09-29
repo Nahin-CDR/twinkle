@@ -3,11 +3,13 @@
 
 Twinkle is an innovative voice recording app built with Flutter, featuring real-time audio effects using the powerful flutter_soloud package. Users can easily record their voice, play it back, and customize their recordings by adding echo effects. Experience seamless audio manipulation with a simple and intuitive interface!
 
+## Play Multiple Sounds with Effects (Demo)
 
-```
+The following code demonstrates how to play multiple audio files and apply distinct effects (like echo and reverb) using the `flutter_soloud` package.
 
-  // just for demo purposes not implemented
-  Future<void> playMultipleSoundsWithEffects() async {
+```dart
+// Just for demo purposes, not implemented
+Future<void> playMultipleSoundsWithEffects() async {
     //await initialize();
 
     // Load two different audio files
@@ -51,6 +53,4 @@ Twinkle is an innovative voice recording app built with Flutter, featuring real-
     // Deactivate filters
     filter1.deactivate();
     filter2.deactivate();
-
-  }
-```
+}
