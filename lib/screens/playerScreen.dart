@@ -105,22 +105,22 @@ class _PlayerScreenState extends State<PlayerScreen> {
             ),
 
             // Reverb Control Slider
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text("Reverb", style: TextStyle(color: Colors.white, fontSize: 18)),
-                Slider(
-                  value: playerProvider.reverb,
-                  onChanged: (value) {
-                   playerProvider.updateReverbValue(value);
-                  },
-                  min: 0.0,
-                  max: 1.0,
-                  activeColor: Colors.orangeAccent,
-                  inactiveColor: Colors.white,
-                ),
-              ],
-            ),
+            // Column(
+            //   crossAxisAlignment: CrossAxisAlignment.start,
+            //   children: [
+            //     const Text("Reverb", style: TextStyle(color: Colors.white, fontSize: 18)),
+            //     Slider(
+            //       value: playerProvider.reverb,
+            //       onChanged: (value) {
+            //        playerProvider.updateReverbValue(value);
+            //       },
+            //       min: 0.0,
+            //       max: 1.0,
+            //       activeColor: Colors.orangeAccent,
+            //       inactiveColor: Colors.white,
+            //     ),
+            //   ],
+            // ),
 
             // Volume Control Slider
             Column(

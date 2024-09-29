@@ -33,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.0),
                 child: Text(
-                  'Welcome to Your Recording App!',
+                  'Welcome to Twinkle!',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
